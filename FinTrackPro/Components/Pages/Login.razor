@@ -1,0 +1,192 @@
+﻿@page "/l"
+@using FinTrackPro.Models
+@using FinTrackPro.Services.Interface
+@inject IUserService UserService
+@inject NavigationManager NavigationManager
+<style>
+    body {
+        min-height: 100vh;
+        width: 100%;
+        background-image: url('/images/loginBg.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0 20px;
+    }
+
+    .container {
+        max-width: 430px;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 10px;
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        padding: 2.5rem;
+        display: flex;
+        flex-direction: column;
+        margin-left: 0px;
+    }
+
+    .form {
+        width: 100%;
+    }
+
+        .form header {
+            font-size: 2rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #333;
+        }
+
+        .form p.slogan {
+            font-size: 1rem;
+            color: #666;
+            text-align: center;
+            margin-bottom: 2rem;
+            max-width: 80%;
+            line-height: 1.4;
+            word-wrap: break-word;
+            margin: 0 auto;
+            margin-bottom: 10px;
+        }
+
+        .form input {
+            height: 50px;
+            width: 100%;
+            padding: 0 15px;
+            font-size: 16px;
+            margin-bottom: 1.3rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+            .form input:focus {
+                border-color: #009579;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            }
+
+            .form input.button {
+                color: #fff;
+                background: #f1c40f;
+                font-size: 1.2rem;
+                font-weight: 500;
+                letter-spacing: 1px;
+                cursor: pointer;
+                border: none;
+                padding: 12px 0;
+                border-radius: 6px;
+                transition: 0.3s;
+            }
+
+                .form input.button:hover {
+                    background: #f39c12;
+                }
+
+        .form a {
+            font-size: 16px;
+            color: #009579;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+            margin-top: 1rem;
+        }
+
+            .form a:hover {
+                text-decoration: underline;
+            }
+
+        .form a.signup {
+            color: #28a745;
+            font-weight: 500;
+            text-decoration: underline;
+            margin-top: 20px;
+            text-align: center;
+            display: block;
+            cursor: pointer;
+        }
+
+            .form a.signup:hover {
+                color: #218838;
+            }
+
+    .comp {
+        font-size: 30px !important;
+        text-align: center !important;
+        color: grey !important;
+    }
+
+    .logo {
+        width: 40px;
+        margin-right: 10px;
+        vertical-align: middle;
+    }
+
+    .error-message {
+        color: red;
+        text-align: center;
+        font-size: 1rem;
+        margin-top: 10px;
+    }
+
+    img {
+        max-width: 100%;
+        height: auto;
+        max-height: 150px;
+    }
+</style>
+
+<body>
+    <div class="container">
+        <div class="login form">
+            <p class="comp">Login</p>
+            @if (string.IsNullOrEmpty(errorMessage))
+            {
+                    <p class="slogan">Manage smarter</p>
+            }
+            else
+            {
+                    <p class="error-message">@errorMessage</p>
+            }
+            <form @onsubmit="HandleLogin">
+                <input type="text" @bind="loginModel.Username" placeholder="Enter your username" required />
+                <input type="password" @bind="loginModel.Password" placeholder="Enter your password" required />
+                <input type="submit" class="button" value="Login" />
+            </form>
+            <a class="signup" @onclick="NavigateToRegister">Not a member? Sign Up</a>
+        </div>
+    </div>
+</body>
+
+@code {
+    private LoginModel loginModel = new LoginModel();
+    private string errorMessage = string.Empty;
+
+    private void HandleLogin()
+    {
+        if (string.IsNullOrWhiteSpace(loginModel.Username) || string.IsNullOrWhiteSpace(loginModel.Password))
+        {
+            errorMessage = "Both fields are required!";
+            return;
+        }
+
+        // Validate login credentials using UserService.
+        if (UserService.Login(loginModel))
+        {
+            NavigationManager.NavigateTo("/home");
+        }
+        else
+        {
+            errorMessage = "Invalid username or password!";
+        }
+    }
+
+    private void NavigateToRegister()
+    {
+        NavigationManager.NavigateTo("/register");
+    }
+}

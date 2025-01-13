@@ -1,0 +1,438 @@
+﻿@* @page "/transaction" *@
+@page "/"
+@using FinTrackPro.Models
+@using FinTrackPro.Services
+@using FinTrackPro.Services.Interface
+@inject IUserService UserService
+@inject FinTrackPro.Services.TransactionService TransactionService
+@inject NavigationManager NavigationManager
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        display: flex;
+        background-color: #f4f4f4;
+    }
+
+    .sidebar {
+        width: 230px;
+        background-color: #B2C6B6;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        padding: 40px 20px;
+        box-sizing: border-box;
+    }
+
+    .logo {
+        object-fit: contain;
+    }
+
+    .sidebar a {
+        display: block;
+        color: Black;
+        text-decoration: none;
+        margin: 30px 0;
+        text-align: left;
+        font-size: 22px;
+        transition: background-color 0.3s ease;
+        padding: 10px;
+    }
+
+        .sidebar a:hover {
+            background-color: #a6944b;
+            border-radius: 5px;
+        }
+
+    .sidebar .logo {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 20px;
+        display: flex;
+        overflow: hidden;
+        border-radius: 50%;
+    }
+
+        .sidebar .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 50%;
+        }
+
+    .sidebar a i {
+        margin-right: 10px;
+        font-size: 24px;
+    }
+
+    .main {
+        margin-left: 240px;
+        padding: 20px;
+        width: calc(100% - 240px);
+        box-sizing: border-box;
+    }
+
+    .payable-transactions h3 {
+        margin-bottom: 20px;
+    }
+
+    .payable-transactions table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    .payable-transactions th,
+    .payable-transactions td {
+        padding: 12px 20px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
+
+    .payable-transactions th {
+        background-color: #E8ECD6;
+        color: Black;
+    }
+
+    .payable-transactions td {
+        background-color: #f4f4f4;
+    }
+
+    .payable-transactions .pay-button {
+        background-color: #B75B48;
+        color: white;
+        padding: 5px 10px;
+        border: none;
+        cursor: pointer;
+    }
+
+        .payable-transactions .pay-button:hover {
+            background-color: #ADD8E6;
+        }
+
+    .add-transaction-btn {
+        background-color: #000000;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 5px;
+        margin-top: 20px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+        .add-transaction-btn:hover {
+            background-color: #ADD8E6;
+        }
+
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal-content {
+        background-color: white;
+        padding: 20px;
+        border-radius: 8px;
+        width: 400px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal input,
+    .modal select {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        margin-top: 5px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    .modal .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+        .modal .close:hover,
+        .modal .close:focus {
+            color: #EF6B6E;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+    .filter-section {
+        margin-bottom: 20px;
+    }
+
+        .filter-section input,
+        .filter-section select {
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .filter-section button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+            .filter-section button:hover {
+                background-color: #45a049;
+            }
+</style>
+<body>
+    @code {
+        private List<TransactionModel> transactions;
+        private List<TransactionModel> filteredTransactions;
+        private TransactionModel newTransaction = new TransactionModel();
+        private bool isAddTransactionPopupVisible = false;
+        private int currentBalance;
+        private string errorMessage = string.Empty;
+
+        // Filters
+        private string labelFilter = string.Empty;
+        private string payeeFilter = string.Empty;
+        private DateTime? dateFilter;
+        private string tagFilter = string.Empty;
+
+        protected override void OnInitialized()
+        {
+            currentBalance = UserService.GetUserBalance();
+            transactions = TransactionService.GetAllTransactions();
+            filteredTransactions = transactions ?? new List<TransactionModel>();
+        }
+
+        private void ApplyFilters()
+        {
+            // Start with all transactions
+            filteredTransactions = transactions ?? new List<TransactionModel>();
+
+            // Apply label filter
+            if (!string.IsNullOrEmpty(labelFilter))
+            {
+                filteredTransactions = filteredTransactions
+                .Where(t => t?.Label != null && t.Label.Contains(labelFilter, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            }
+
+            // Apply payee filter
+            if (!string.IsNullOrEmpty(payeeFilter))
+            {
+                filteredTransactions = filteredTransactions
+                .Where(t => t?.Payee != null && t.Payee.Contains(payeeFilter, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            }
+
+            // Apply date filter
+            if (dateFilter.HasValue)
+            {
+                filteredTransactions = filteredTransactions
+                .Where(t => t?.Date != null && t.Date.Date == dateFilter.Value.Date)
+                .ToList();
+            }
+
+            // Apply tag filter
+            if (!string.IsNullOrEmpty(tagFilter))
+            {
+                filteredTransactions = filteredTransactions
+                .Where(t => t?.Tag != null && t.Tag.Equals(tagFilter, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            }
+        }
+
+        private void AddTransaction()
+        {
+            if (newTransaction.type == "Credit")
+            {
+                currentBalance += newTransaction.Amount;
+                UserService.UpdateUserBalance(currentBalance);
+            }
+
+            TransactionService.AddTransaction(newTransaction);
+            transactions = TransactionService.GetAllTransactions();
+            ApplyFilters(); // Re-apply filters after adding a transaction
+            isAddTransactionPopupVisible = false;
+        }
+
+        private void ShowAddTransactionPopup()
+        {
+            isAddTransactionPopupVisible = true;
+        }
+
+        private void HideAddTransactionPopup()
+        {
+            isAddTransactionPopupVisible = false;
+        }
+
+        private void DeleteTransaction(Guid transactionId, int amount)
+        {
+            if (currentBalance >= amount)
+            {
+                TransactionService.DeleteTransaction(transactionId);
+                currentBalance -= amount;
+                UserService.UpdateUserBalance(currentBalance);
+                transactions = TransactionService.GetAllTransactions();
+                ApplyFilters(); // Re-apply filters after deleting a transaction
+                errorMessage = string.Empty;
+            }
+            else
+            {
+                errorMessage = "Insufficient funds to complete the transaction.";
+            }
+        }
+    }
+
+    <div class="sidebar">
+        <div class="logo">
+            <img src="Images/fintrackpro-high-resolution-logo.png" alt="Logo" />
+        </div>
+        <a href="/home"><i class="fas fa-home"></i>Home</a>
+        <a href="/transaction"><i class="fas fa-credit-card"></i>Transactions</a>
+        <a href="/debts"><i class="fas fa-clipboard-list"></i>Debts</a>
+        <a href="/"><i class="fas fa-sign-out-alt"></i>Log Out</a>
+    </div>
+
+    <div class="main">
+        <div class="payable-transactions">
+            <h3>Payable Transactions</h3>
+
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <input type="text" placeholder="Filter by Label" @bind="labelFilter" />
+                <input type="text" placeholder="Filter by Payee" @bind="payeeFilter" />
+                <input type="date" @bind="dateFilter" />
+                <select @bind="tagFilter">
+                    <option value="">Filter by Tag</option>
+                    <option value="Vehicle">Vehicle</option>
+                    <option value="Person">Person</option>
+                    <option value="Utility">Utility</option>
+                </select>
+                <button @onclick="ApplyFilters">Apply Filters</button>
+            </div>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <p style="color: red; font-weight: bold;">@errorMessage</p>
+            }
+
+            @if (filteredTransactions.Any())
+            {
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Payment Name</th>
+                            <th>Recipient</th>
+                            <th>Due Date</th>
+                            <th>Amount Payable</th>
+                            <th>Tag</th>
+                            <th>Type</th>
+                            <th>Note</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var transaction in filteredTransactions)
+                        {
+                            <tr>
+                                <td>@transaction.Label</td>
+                                <td>@transaction.Payee</td>
+                                <td>@transaction.Date.ToString("MM/dd/yyyy")</td>
+                                <td>@transaction.Amount.ToString("C")</td>
+
+                                <td>
+                                    @if (!string.IsNullOrEmpty(transaction.CustomTag))
+                                    {
+                                        <span>@transaction.CustomTag</span>
+                                    }
+                                    else
+                                    {
+                                        <span>@transaction.Tag</span>
+                                    }
+                                </td>
+
+                                <td>@transaction.type</td>
+
+                                <td>
+                                    @if (!string.IsNullOrEmpty(transaction.Note))
+                                    {
+                                        <span>@transaction.Note</span>
+                                    }
+                                    else
+                                    {
+                                        <span>No notes available</span>
+                                    }
+                                </td>
+
+                                <td>
+                                    @if (transaction.type != "Credit")
+                                    {
+                                        <button class="pay-button" @onclick="() => DeleteTransaction(transaction.Id, transaction.Amount)">Pay</button>
+                                    }
+                                    else
+                                    {
+                                        <span>No Action available</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p>No data available at the moment</p>
+            }
+
+            <button class="add-transaction-btn" @onclick="ShowAddTransactionPopup">Add Transaction</button>
+        </div>
+    </div>
+
+    <!-- Modal Section -->
+    <div class="modal" style="@(isAddTransactionPopupVisible ? "display: flex;" : "display: none;")">
+        <div class="modal-content">
+            <span class="close" @onclick="HideAddTransactionPopup">&times;</span>
+            <h3>Add a New Transaction</h3>
+            <input type="text" @bind="newTransaction.Label" placeholder="Payment Name" />
+            <input type="text" @bind="newTransaction.Payee" placeholder="Payable To" />
+            <input type="date" @bind="newTransaction.Date" />
+            <input type="number" @bind="newTransaction.Amount" placeholder="Amount Payable" />
+            <select @bind="newTransaction.Tag">
+                <option value="">Select Tag</option>
+                <option value="Vehicle">Vehicle</option>
+                <option value="Person">Person</option>
+                <option value="Utility">Utility</option>
+            </select>
+            <select @bind="newTransaction.type">
+                <option value="">Select Type</option>
+                <option value="Credit">Credit</option>
+                <option value="Debit">Debit</option>
+            </select>
+            <input type="text" @bind="newTransaction.CustomTag" placeholder="Custom Tag ?" />
+            <textarea @bind="newTransaction.Note" placeholder="Note" rows="3"></textarea>
+
+            <button class="add-transaction-btn" @onclick="AddTransaction">Add Transaction</button>
+        </div>
+    </div>
+</body>
