@@ -139,7 +139,6 @@
         max-height: 150px;
     }
 </style>
-
 <body>
     <div class="container">
         <div class="login form">
@@ -161,11 +160,9 @@
         </div>
     </div>
 </body>
-
 @code {
     private LoginModel loginModel = new LoginModel();
     private string errorMessage = string.Empty;
-
     private void HandleLogin()
     {
         if (string.IsNullOrWhiteSpace(loginModel.Username) || string.IsNullOrWhiteSpace(loginModel.Password))
@@ -173,8 +170,6 @@
             errorMessage = "Both fields are required!";
             return;
         }
-
-        // Validate login credentials using UserService.
         if (UserService.Login(loginModel))
         {
             NavigationManager.NavigateTo("/home");
@@ -184,7 +179,6 @@
             errorMessage = "Invalid username or password!";
         }
     }
-
     private void NavigateToRegister()
     {
         NavigationManager.NavigateTo("/register");
