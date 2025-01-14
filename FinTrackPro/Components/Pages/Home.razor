@@ -1,5 +1,4 @@
-﻿@* @page "/home" *@
-@page "/"
+﻿@page "/home"
 @inject IUserService UserService
 @inject TransactionService TransactionService
 @using FinTrackPro.Models
@@ -283,7 +282,7 @@ else
     {
         currentBalance = UserService.GetUserBalance();
         upcomingTransactions = TransactionService.GetAllTransactions()
-            .Where(t => t.type != "Credit")// Exclude 'credit' transactions
+            .Where(t => t.type != "Credit" &&  t.type != "Debit" )// Exclude 'credit' transactions
             .OrderBy(t => t.Date)  // Sort by date for upcoming transactions
             .Take(5)  // Show only the top 5 upcoming transactions
             .ToList();
