@@ -3,6 +3,14 @@
   "WorkspaceRootPath": "C:\\Users\\aagam\\Documents\\Gituhub\\DotNetProj\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\aagam\\Documents\\Gituhub\\DotNetProj\\FinTrackPro\\Components\\Pages\\Debts.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:FinTrackPro\\Components\\Pages\\Debts.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\aagam\\Documents\\Gituhub\\DotNetProj\\FinTrackPro\\Components\\Pages\\Dashboard.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:FinTrackPro\\Components\\Pages\\Dashboard.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\aagam\\Documents\\Gituhub\\DotNetProj\\FinTrackPro\\Components\\Pages\\Transaction.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:FinTrackPro\\Components\\Pages\\Transaction.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
@@ -23,15 +31,39 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "Debts.razor",
+              "DocumentMoniker": "C:\\Users\\aagam\\Documents\\Gituhub\\DotNetProj\\FinTrackPro\\Components\\Pages\\Debts.razor",
+              "RelativeDocumentMoniker": "FinTrackPro\\Components\\Pages\\Debts.razor",
+              "ToolTip": "C:\\Users\\aagam\\Documents\\Gituhub\\DotNetProj\\FinTrackPro\\Components\\Pages\\Debts.razor",
+              "RelativeToolTip": "FinTrackPro\\Components\\Pages\\Debts.razor",
+              "ViewState": "AgIAANUAAAAAAAAAAAAAAOYAAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-01-15T13:11:27.895Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Dashboard.razor",
+              "DocumentMoniker": "C:\\Users\\aagam\\Documents\\Gituhub\\DotNetProj\\FinTrackPro\\Components\\Pages\\Dashboard.razor",
+              "RelativeDocumentMoniker": "FinTrackPro\\Components\\Pages\\Dashboard.razor",
+              "ToolTip": "C:\\Users\\aagam\\Documents\\Gituhub\\DotNetProj\\FinTrackPro\\Components\\Pages\\Dashboard.razor",
+              "RelativeToolTip": "FinTrackPro\\Components\\Pages\\Dashboard.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-01-15T13:11:16.142Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "Transaction.razor",
               "DocumentMoniker": "C:\\Users\\aagam\\Documents\\Gituhub\\DotNetProj\\FinTrackPro\\Components\\Pages\\Transaction.razor",
               "RelativeDocumentMoniker": "FinTrackPro\\Components\\Pages\\Transaction.razor",
               "ToolTip": "C:\\Users\\aagam\\Documents\\Gituhub\\DotNetProj\\FinTrackPro\\Components\\Pages\\Transaction.razor",
               "RelativeToolTip": "FinTrackPro\\Components\\Pages\\Transaction.razor",
-              "ViewState": "AgIAADsBAAAAAAAAAAAAAE8BAABLAAAAAAAAAA==",
+              "ViewState": "AgIAADIBAAAAAAAAAAAAAEYBAAA6AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-01-14T01:49:12.798Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-01-14T01:49:12.798Z"
             }
           ]
         }

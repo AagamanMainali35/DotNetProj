@@ -3,7 +3,7 @@
 @using FinTrackPro.Services
 @using FinTrackPro.Services.Interface
 @inject IUserService UserService
-@inject FinTrackPro.Services.TransactionService TransactionService
+@inject DebtService DebtService
 @inject NavigationManager NavigationManager
 
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
@@ -144,6 +144,10 @@
         align-items: center;
     }
 
+        .modal.show {
+            display: flex; /* Show modal when the 'show' class is applied */
+        }
+
     .modal-content {
         background-color: white;
         padding: 20px;
@@ -178,6 +182,8 @@
 
     .filter-section {
         margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
     }
 
         .filter-section input,
@@ -200,13 +206,27 @@
             .filter-section button:hover {
                 background-color: #45a049;
             }
+
+    .sort-button {
+        padding: 8px 16px;
+        background-color: #007BFF;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        margin-left: 20px;
+    }
+
+        .sort-button:hover {
+            background-color: #0056b3;
+        }
 </style>
 
 <body>
     @code {
-        private List<TransactionModel> debts;
-        private List<TransactionModel> filteredDebts;
-        private TransactionModel newDebt = new TransactionModel();
+        private List<DebtModel> debts;
+        private List<DebtModel> filteredDebts;
+        private DebtModel newDebt = new DebtModel();
         private bool isAddDebtPopupVisible = false;
         private int currentBalance;
         private string errorMessage = string.Empty;
@@ -217,65 +237,27 @@
         private DateTime? dateFilter;
         private string tagFilter = string.Empty;
 
+        // Sorting flag
+        private bool isSortedAsc = true;
+
         protected override void OnInitialized()
         {
             currentBalance = UserService.GetUserBalance();
-            debts = TransactionService.GetAllTransactions()
-            .Where(t => t.type == "Debt") // Filter only debts
-            .ToList();
-            filteredDebts = debts ?? new List<TransactionModel>();
-        }
-
-        private void ApplyFilters()
-        {
-            filteredDebts = debts ?? new List<TransactionModel>();
-
-            // Apply label filter
-            if (!string.IsNullOrEmpty(labelFilter))
-            {
-                filteredDebts = filteredDebts
-                .Where(t => t?.Label != null && t.Label.Contains(labelFilter, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-            }
-
-            // Apply payee filter
-            if (!string.IsNullOrEmpty(payeeFilter))
-            {
-                filteredDebts = filteredDebts
-                .Where(t => t?.Payee != null && t.Payee.Contains(payeeFilter, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-            }
-
-            // Apply date filter
-            if (dateFilter.HasValue)
-            {
-                filteredDebts = filteredDebts
-                .Where(t => t?.Date != null && t.Date.Date == dateFilter.Value.Date)
-                .ToList();
-            }
-
-            // Apply tag filter
-            if (!string.IsNullOrEmpty(tagFilter))
-            {
-                filteredDebts = filteredDebts
-                .Where(t => t?.Tag != null && t.Tag.Equals(tagFilter, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-            }
+            debts = DebtService.GetDebtsByStatus("Pending"); // Fetch only debts that are Pending
+            filteredDebts = debts ?? new List<DebtModel>();
         }
 
         private void AddDebt()
         {
-            TransactionService.AddTransaction(newDebt);
-            debts = TransactionService.GetAllTransactions()
-            .Where(t => t.type == "Debt") // Filter only debts
-            .ToList();
-            ApplyFilters(); // Re-apply filters after adding a debt
+            DebtService.AddNewDebt(newDebt);
+            debts = DebtService.GetDebtsByStatus("Pending");
+            filteredDebts = debts;
             isAddDebtPopupVisible = false;
         }
 
         private void ShowAddDebtPopup()
         {
-            newDebt = new TransactionModel { type = "Debt" }; // Set type to "Debt"
+            newDebt = new DebtModel { Status = "Pending" }; // Set status to Pending by default
             isAddDebtPopupVisible = true;
         }
 
@@ -284,34 +266,47 @@
             isAddDebtPopupVisible = false;
         }
 
-        private void DeleteDebt(Guid transactionId, int amount)
+        private void DeleteDebt(Guid debtId, int amount)
         {
             if (currentBalance >= amount)
             {
-                // Update User Balance
                 currentBalance -= amount;
                 UserService.UpdateUserBalance(currentBalance);
 
-                // Delete the transaction from the transaction service
-                bool isDeleted = TransactionService.DeleteTransaction(transactionId);
-
-                if (isDeleted)
-                {
-                    debts = TransactionService.GetAllTransactions()
-                    .Where(t => t.type == "Debt") // Filter only debts
-                    .ToList();
-                    ApplyFilters(); // Re-apply filters after deleting a debt
-                    errorMessage = string.Empty;
-                }
-                else
-                {
-                    errorMessage = "Transaction could not be deleted.";
-                }
+                DebtService.UpdateDebtStatus(debtId, "Paid");
+                debts = DebtService.GetDebtsByStatus("Pending");
+                filteredDebts = debts;
+                errorMessage = string.Empty;
             }
             else
             {
                 errorMessage = "Insufficient funds to complete the debt payment.";
             }
+        }
+
+        private void ApplyFilters()
+        {
+            filteredDebts = debts.Where(debt =>
+            (string.IsNullOrEmpty(labelFilter) || debt.Label.Contains(labelFilter, StringComparison.OrdinalIgnoreCase)) &&
+            (string.IsNullOrEmpty(payeeFilter) || debt.Payee.Contains(payeeFilter, StringComparison.OrdinalIgnoreCase)) &&
+            (!dateFilter.HasValue || debt.DueDate == dateFilter.Value.Date) &&
+            (string.IsNullOrEmpty(tagFilter) || debt.Tag.Contains(tagFilter, StringComparison.OrdinalIgnoreCase))
+            ).ToList();
+        }
+
+        private void ToggleSortByDate()
+        {
+            if (isSortedAsc)
+            {
+                filteredDebts = filteredDebts.OrderByDescending(debt => debt.DueDate).ToList();
+            }
+            else
+            {
+                filteredDebts = filteredDebts.OrderBy(debt => debt.DueDate).ToList();
+            }
+
+            // Toggle sorting flag
+            isSortedAsc = !isSortedAsc;
         }
     }
 
@@ -321,27 +316,30 @@
         </div>
         <a href="/home"><i class="fas fa-home"></i>Home</a>
         <a href="/transaction"><i class="fas fa-credit-card"></i>Transactions</a>
-        <a href="/debt"><i class="fas fa-clipboard-list"></i>Debts</a>
+        <a href="/debts"><i class="fas fa-clipboard-list"></i>Debts</a>
+        <a href="/dashboard"><i class="fas fa-dashboard"></i>DashBoard</a>
         <a href="/"><i class="fas fa-sign-out-alt"></i>Log Out</a>
     </div>
 
     <div class="main">
+        <div class="filter-section">
+            <input type="text" placeholder="Label" @bind="labelFilter" @bind:event="oninput" />
+            <input type="text" placeholder="Payee" @bind="payeeFilter" @bind:event="oninput" />
+            <input type="date" @bind="dateFilter" />
+            <select @bind="tagFilter">
+                <option value="">Tag</option>
+                <option value="Vehicle">Vehicle</option>
+                <option value="Person">Person</option>
+                <option value="Utility">Utility</option>
+            </select>
+            <button @onclick="ApplyFilters">Apply Filters</button>
+            <button class="sort-button" @onclick="ToggleSortByDate">
+                Sort by Date 
+            </button>
+        </div>
+
         <div class="debt-transactions">
             <h3>Debt Transactions</h3>
-
-            <!-- Filter Section -->
-            <div class="filter-section">
-                <input type="text" placeholder="Filter by Label" @bind="labelFilter" />
-                <input type="text" placeholder="Filter by Payee" @bind="payeeFilter" />
-                <input type="date" @bind="dateFilter" />
-                <select @bind="tagFilter">
-                    <option value="">Filter by Tag</option>
-                    <option value="Vehicle">Vehicle</option>
-                    <option value="Person">Person</option>
-                    <option value="Utility">Utility</option>
-                </select>
-                <button @onclick="ApplyFilters">Apply Filters</button>
-            </div>
 
             @if (!string.IsNullOrEmpty(errorMessage))
             {
@@ -355,6 +353,7 @@
                         <th>Payee</th>
                         <th>Amount</th>
                         <th>Date</th>
+                        <th>Status</th>
                         <th>Tag</th>
                         <th>Actions</th>
                     </tr>
@@ -366,10 +365,14 @@
                             <td>@debt.Label</td>
                             <td>@debt.Payee</td>
                             <td>@debt.Amount</td>
-                            <td>@debt.Date.ToShortDateString()</td>
+                            <td>@debt.DueDate</td>
+                            <td>@debt.Status</td>
                             <td>@debt.Tag</td>
                             <td>
-                                <button class="pay-button" @onclick="(() => DeleteDebt(debt.Id, debt.Amount))">Pay</button>
+                                @if (debt.Status == "Pending")
+                                {
+                                    <button class="pay-button" @onclick="(() => DeleteDebt(debt.Id, debt.Amount))">Pay</button>
+                                }
                             </td>
                         </tr>
                     }
@@ -378,26 +381,22 @@
 
             <button class="add-debt-btn" @onclick="ShowAddDebtPopup">Add Debt</button>
         </div>
+    </div>
 
-        <!-- Add Debt Modal -->
-        @if (isAddDebtPopupVisible)
-        {
-            <div class="modal">
-                <div class="modal-content">
-                    <span class="close" @onclick="HideAddDebtPopup">&times;</span>
-                    <h3>Add Debt</h3>
-                    <input type="text" placeholder="Label" @bind="newDebt.Label" />
-                    <input type="text" placeholder="Payee" @bind="newDebt.Payee" />
-                    <input type="number" placeholder="Amount" @bind="newDebt.Amount" />
-                    <input type="date" @bind="newDebt.Date" />
-                    <select @bind="newDebt.Tag">
-                        <option value="Vehicle">Vehicle</option>
-                        <option value="Person">Person</option>
-                        <option value="Utility">Utility</option>
-                    </select>
-                    <button @onclick="AddDebt">Add Debt</button>
-                </div>
-            </div>
-        }
+    <div class="modal @(isAddDebtPopupVisible ? "show" : "")">
+        <div class="modal-content">
+            <span class="close" @onclick="HideAddDebtPopup">&times;</span>
+            <h2>Add Debt</h2>
+            <input type="text" placeholder="Label" @bind="newDebt.Label" />
+            <input type="text" placeholder="Payee" @bind="newDebt.Payee" />
+            <input type="number" placeholder="Amount" @bind="newDebt.Amount" />
+            <input type="date" @bind="newDebt.DueDate" />
+            <select @bind="newDebt.Tag">
+                <option value="Vehicle">Vehicle</option>
+                <option value="Person">Person</option>
+                <option value="Utility">Utility</option>
+            </select>
+            <button class="add-debt-btn" @onclick="AddDebt">Add Debt</button>
+        </div>
     </div>
 </body>

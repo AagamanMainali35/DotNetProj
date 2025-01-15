@@ -1,5 +1,6 @@
 ﻿using FinTrackPro.Services;
 using FinTrackPro.Services.Interface;
+using Microcharts.Maui;
 using Microsoft.Extensions.Logging;
 using MudBlazor.Services;
 
@@ -20,12 +21,13 @@ namespace FinTrackPro
             builder.Services.AddMauiBlazorWebView();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddSingleton<TransactionService>();
+            builder.Services.AddSingleton<DebtService>();
 
 
 
 #if DEBUG
             builder.Services.AddBlazorWebViewDeveloperTools();
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
             builder.Services.AddMudServices();
 
 

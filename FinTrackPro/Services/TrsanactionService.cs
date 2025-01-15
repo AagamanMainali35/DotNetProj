@@ -3,9 +3,9 @@ using System.Text.Json;
 using FinTrackPro.Services.Interface;
 namespace FinTrackPro.Services
 {
-    public class TransactionService :  ITransaction
+   public class TransactionService :  ITransaction
     {
-        protected static readonly string FilePath = Path.Combine(FileSystem.AppDataDirectory, "debts.json");
+        protected static readonly string FilePath = Path.Combine(FileSystem.AppDataDirectory, "Transactions.json");
 
         // Load transactions from the JSON file
         public List<TransactionModel> GetAllTransactions()
@@ -63,6 +63,28 @@ namespace FinTrackPro.Services
             }
            
         }
+
+        public List<TransactionModel> GetTopTransactions(int count)
+        {
+            var transactions = GetAllTransactions();
+            return transactions
+                    .OrderByDescending(t => t.Amount) // Sort by Amount in descending order
+                    .Take(count) // Take the top 'count' transactions
+                    .ToList();
+        }
+
+
+        public int TotalTransaction()
+        {
+            int TotalAmount = 0;
+            var transactions = GetAllTransactions();
+            foreach(var transaction in transactions)
+            {
+                TotalAmount += transaction.Amount;
+            }
+            return TotalAmount;
+        }
+
 
         // Save the list of transactions to the JSON file
         private bool SaveTransactions(List<TransactionModel> transactions)
