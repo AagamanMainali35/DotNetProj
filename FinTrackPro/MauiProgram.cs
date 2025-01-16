@@ -19,6 +19,7 @@ namespace FinTrackPro
                 });
 
             builder.Services.AddMauiBlazorWebView();
+            builder.Services.AddSingleton<UserService>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddSingleton<TransactionService>();
             builder.Services.AddSingleton<DebtService>();

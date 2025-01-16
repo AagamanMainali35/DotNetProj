@@ -89,11 +89,25 @@ namespace FinTrackPro.Services
             return true;
         }
 
-
         public int GetUserBalance()
         {
             var user = _users.FirstOrDefault(u => u.Username == SeedUsername);
             return user?.Balance ?? 0; 
+        }
+        public string getCurrency()
+        {
+            var user = _users.FirstOrDefault(u => u.Username == SeedUsername);
+            return user.PreferredCurrency;
+        }
+        public bool UpdatePreferredCurrency(string preferredCurrency)
+        {
+            var user = _users.FirstOrDefault(u => u.Username == SeedUsername); // Only one user "admin"
+            if (user == null)
+                return false;
+
+            user.PreferredCurrency = preferredCurrency; // Update the preferred currency.
+            SaveUsers(_users); // Save the updated list of users to the JSON file.
+            return true;
         }
     }
 }

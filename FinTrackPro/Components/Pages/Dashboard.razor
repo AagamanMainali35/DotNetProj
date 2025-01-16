@@ -1,103 +1,125 @@
 ﻿@page "/dashboard"
 @inject FinTrackPro.Services.TransactionService TransactionService
+@inject FinTrackPro.Services.DebtService debtservice
+@inject FinTrackPro.Services.UserService userservice
 @using MudBlazor
 <style>
     .sidebar {
-    width: 230px;
-    background-color: #B2C6B6;
-    height: 100vh;
-    position: fixed;
-    top: 0;
-    left: 0;
-    padding: 40px 20px;
-    box-sizing: border-box;
+        width: 230px;
+        background-color: #B2C6B6;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        padding: 40px 20px;
+        box-sizing: border-box;
+        transition: transform 0.3s ease-in-out;
     }
+
     .sidebar .logo {
-    width: 100px;
-    height: 100px;
-    margin: 0 auto 20px;
-    display: flex;
-    overflow: hidden;
-    border-radius: 50%;
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 20px;
+        display: flex;
+        overflow: hidden;
+        border-radius: 50%;
     }
+
     .sidebar .logo img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    border-radius: 50%;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 50%;
     }
+
     .sidebar a {
-    display: block;
-    color: Black;
-    text-decoration: none;
-    margin: 30px 0;
-    text-align: left;
-    font-size: 22px;
-    transition: background-color 0.3s ease;
-    padding: 10px;
+        display: block;
+        color: Black;
+        text-decoration: none;
+        margin: 30px 0;
+        text-align: left;
+        font-size: 22px;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+        padding: 10px;
     }
+
     .sidebar a:hover {
-    background-color: #a6944b;
-    border-radius: 5px;
+        background-color: #a6944b;
+        border-radius: 5px;
+        transform: translateX(10px);
     }
 
     .sidebar a i {
-    margin-right: 10px;
-    font-size: 24px;
+        margin-right: 10px;
+        font-size: 24px;
     }
+
     .chart-container {
-    padding: 20px;
-    border-radius: 10px;
-    background-color: #f9f9f9;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin: 20px auto;
-    max-width: 90vw;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow-x: auto;
-    margin-left: 50px; /* Added 50px margin */
+        padding: 20px;
+        border-radius: 10px;
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        margin: 20px auto;
+        max-width: 90vw;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow-x: auto;
+       
     }
+
     .chart-title {
-    text-align: center;
-    color: #333;
-    font-size: 28px;
-    margin-bottom: 20px;
+        text-align: center;
+        color: #333;
+        font-size: 28px;
+        margin-bottom: 20px;
     }
+
     .chart-wrapper {
-    width: 100%;
-    max-width: 1500px;
+        width: 100%;
+        max-width: 1500px;
     }
+
     .cards-container {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 20px;
-    margin: 30px auto;
-    max-width: 1600px;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin: 30px auto;
+        max-width: 1200px; /* Reduced max-width for smaller cards */
     }
+
     .card {
-    flex: 1 1 calc(25% - 20px);
-    min-width: 200px;
-    background-color: #B2C6B6;
-    border-radius: 10px;
-    padding: 20px;
-    text-align: center;
-    color: #333;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        flex: 1 1 calc(20% - 20px); /* Reduced card size */
+        min-width: 180px; /* Smaller card minimum width */
+        background-color: #B2C6B6;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        color: #333;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+
     .card h3 {
-    margin: 0;
-    font-size: 24px;
-    color: #444;
+        margin: 0;
+        font-size: 22px; /* Reduced font size for smaller cards */
+        color: #444;
     }
+
     .card p {
-    margin-top: 10px;
-    font-size: 18px;
-    color: #666;
+        margin-top: 10px;
+        font-size: 16px; /* Reduced font size for smaller cards */
+        color: #666;
     }
 </style>
+
 <div class="sidebar">
     <div class="logo">
         <img src="Images/fintrackpro-high-resolution-logo.png" alt="Logo" />
@@ -127,41 +149,100 @@
     }
 </div>
 
-<!-- Cards Section -->
 <div class="cards-container">
     <div class="card">
         <h3>Total Balance</h3>
-        <p>$0.00</p>
+        <p>@currency@balance</p>
     </div>
     <div class="card">
         <h3>Total Debt</h3>
-        <p>$0.00</p>
+        <p>@currency@totaldebt</p>
     </div>
     <div class="card">
         <h3>Total Expense</h3>
-        <p>@totalTransactionAmount</p>
+        <p>@currency@totalTransactionAmount</p>
     </div>
     <div class="card">
-        <h3>Total Savings</h3>
-        <p>$0.00</p>
+        <h3>Total Income</h3>
+        <p>@currency@Income</p>
+    </div>
+    <div class="card">
+        <h3>Highest Credit</h3>
+        <p>@currency@GetHighestcredit</p>
+    </div>
+    <div class="card">
+        <h3>Lowest Credit</h3>
+        <p>@currency@GetLowestcredit</p>
+    </div>
+    <div class="card">
+        <h3>Highest Debit</h3>
+        <p>@currency@GetHighestdebit</p>
+    </div>
+    <div class="card">
+        <h3>Lowest Debit</h3>
+        <p>@currency@GetLowestDebit</p>
+    </div>
+    <div class="card">
+        <h3>Total Debit Transaction</h3>
+        <p>@currency@TotalDebitTransaction</p>
+    </div>
+    <div class="card">
+        <h3>Lowest Paid Debt</h3>
+        <p>@currency@GetLowestPaidDebt</p>
+    </div>
+    <div class="card">
+        <h3>Highest Pending Debt</h3>
+        <p>@currency@GetHighestPendingDebt</p>
+    </div>
+    <div class="card">
+        <h3>Highest Paid Debt</h3>
+        <p>@currency@GetHighestPaidDebt</p>
+    </div>
+    <div class="card">
+        <h3>Lowest Pending Debt</h3>
+        <p>@currency@GetLowestPendingDebt</p>
     </div>
 </div>
 
 @code {
-    // Chart data series
+
     public List<ChartSeries> BarSeries { get; set; } = new List<ChartSeries>();
     public string[] XAxisLabels { get; set; } = Array.Empty<string>();
     public int totalTransactionAmount;
-   
+    public int Income;
+    public int totaldebt;
+    public int balance;
+    public string currency;
+    public int GetHighestcredit;
+    public int GetLowestcredit;
+    public int GetHighestdebit;
+    public int GetLowestDebit;
+    public int TotalDebitTransaction;
+    public int GetLowestPaidDebt;
+    public int GetHighestPendingDebt;
+    public int GetHighestPaidDebt;
+    public int GetLowestPendingDebt;
+
+
     protected override void OnInitialized()
     {
         LoadTopTransactions();
         totalTransactionAmount = TransactionService.TotalTransaction();
+        Income = TransactionService.TotalCreditTransaction();
+        totaldebt = debtservice.TotalDebtAmount();
+        balance = userservice.GetUserBalance();
+        currency = userservice.getCurrency();
+        GetHighestcredit = TransactionService.GetHighestcredit();
+        GetLowestcredit = TransactionService.GetLowestcredit();
+        GetHighestdebit = TransactionService.GetHighestdebit();
+        GetLowestDebit = TransactionService.GetLowestDebit();
+        TotalDebitTransaction = TransactionService.TotalDebitTransaction();
+        GetLowestPaidDebt = debtservice.GetLowestPaidDebt();
+        GetHighestPendingDebt = debtservice.GetHighestPendingDebt();
+        GetHighestPaidDebt = debtservice.GetHighestPaidDebt();
+        GetLowestPendingDebt = debtservice.GetLowestPendingDebt();
     }
 
-    /// <summary>
-    /// Load top 5 transactions and populate the chart data
-    /// </summary>
     private void LoadTopTransactions()
     {
         // Retrieve and process transactions
@@ -178,7 +259,6 @@
             .Take(5)
             .ToList();
 
-        // Prepare data for the bar chart
         XAxisLabels = filteredTransactions.Select(t => t.Label).ToArray();
         var transactionAmounts = filteredTransactions.Select(t => (double)t.Amount).ToArray();
 

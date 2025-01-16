@@ -2,6 +2,7 @@
 @inject IUserService UserService
 @inject DebtService debtService
 @inject TransactionService TransactionService
+@inject UserService UserService
 @using FinTrackPro.Models
 @using FinTrackPro.Services
 @using System.Linq
@@ -12,185 +13,185 @@
 <style>
     /* Sidebar */
     .sidebar {
-        width: 230px;
-        background-color: #B2C6B6;
-        height: 100vh;
-        position: fixed;
-        top: 0;
-        left: 0;
-        padding: 40px 20px;
-        box-sizing: border-box;
+    width: 230px;
+    background-color: #B2C6B6;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 40px 20px;
+    box-sizing: border-box;
     }
 
-        .sidebar .logo {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 20px;
-            display: flex;
-            overflow: hidden;
-            border-radius: 50%;
-        }
+    .sidebar .logo {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 20px;
+    display: flex;
+    overflow: hidden;
+    border-radius: 50%;
+    }
 
-            .sidebar .logo img {
-                width: 100%;
-                height: 100%;
-                object-fit: contain;
-                border-radius: 50%;
-            }
+    .sidebar .logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 50%;
+    }
 
-        .sidebar a {
-            display: block;
-            color: Black;
-            text-decoration: none;
-            margin: 30px 0;
-            text-align: left;
-            font-size: 22px;
-            transition: background-color 0.3s ease;
-            padding: 10px;
-        }
+    .sidebar a {
+    display: block;
+    color: Black;
+    text-decoration: none;
+    margin: 30px 0;
+    text-align: left;
+    font-size: 22px;
+    transition: background-color 0.3s ease;
+    padding: 10px;
+    }
 
-            .sidebar a:hover {
-                background-color: #a6944b;
-                border-radius: 5px;
-            }
+    .sidebar a:hover {
+    background-color: #a6944b;
+    border-radius: 5px;
+    }
 
-            .sidebar a i {
-                margin-right: 10px;
-                font-size: 24px;
-            }
+    .sidebar a i {
+    margin-right: 10px;
+    font-size: 24px;
+    }
 
     /* User Section */
     .balance-section {
-        background-color: #e5f4e1;
-        border-radius: 12px;
-        padding: 30px;
-        margin-bottom: 30px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease;
+    background-color: #e5f4e1;
+    border-radius: 12px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
     }
 
-        .balance-section:hover {
-            transform: scale(1.02);
-        }
+    .balance-section:hover {
+    transform: scale(1.02);
+    }
 
-        .balance-section h4 {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
+    .balance-section h4 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    }
 
-        .balance-section p {
-            font-size: 18px;
-            margin: 5px 0;
-        }
+    .balance-section p {
+    font-size: 18px;
+    margin: 5px 0;
+    }
 
     .add-balance-btn {
-        background: linear-gradient(to right, #81c784, #388e3c);
-        color: white;
-        border: none;
-        padding: 15px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 18px;
-        width: 220px;
-        margin-top: 15px;
+    background: linear-gradient(to right, #81c784, #388e3c);
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    width: 220px;
+    margin-top: 15px;
     }
 
-        .add-balance-btn:hover {
-            background-color: #2c6e2d;
-        }
+    .add-balance-btn:hover {
+    background-color: #2c6e2d;
+    }
 
     /* Transaction History */
     .transaction-history {
-        margin-top: 30px;
-        background-color: #f9f9f9;
-        padding: 30px;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+    background-color: #f9f9f9;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
 
-        .transaction-history h4 {
-            font-size: 22px;
-            margin-bottom: 20px;
-        }
+    .transaction-history h4 {
+    font-size: 22px;
+    margin-bottom: 20px;
+    }
 
-        .transaction-history table {
-            width: 50rem;
-            border-collapse: collapse;
-        }
+    .transaction-history table {
+    width: 50rem;
+    border-collapse: collapse;
+    }
 
-        .transaction-history th, .transaction-history td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
+    .transaction-history th, .transaction-history td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    }
 
-        .transaction-history th {
-            background-color: #f2f2f2;
-        }
+    .transaction-history th {
+    background-color: #f2f2f2;
+    }
 
-        .transaction-history tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
+    .transaction-history tr:nth-child(even) {
+    background-color: #f9f9f9;
+    }
 
-        .transaction-history tr:hover {
-            background-color: #f1f1f1;
-        }
+    .transaction-history tr:hover {
+    background-color: #f1f1f1;
+    }
 
-        .transaction-history .highlight {
-            background-color: #f8d7da;
-        }
+    .transaction-history .highlight {
+    background-color: #f8d7da;
+    }
 
     /* Modal */
     .modal {
-        display: @modalDisplay;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        justify-content: center;
-        align-items: center;
+    display: @modalDisplay;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
     }
 
     .modal-content {
-        background-color: white;
-        padding: 20px;
-        border-radius: 8px;
-        width: 300px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
     }
 
     .modal h4 {
-        margin-bottom: 20px;
+    margin-bottom: 20px;
     }
 
     .modal input {
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 15px;
-        border-radius: 5px;
-        border: 1px solid #ddd;
-        font-size: 16px;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-size: 16px;
     }
 
     .modal button {
-        background-color: #388e3c;
-        color: white;
-        border: none;
-        padding: 10px;
-        cursor: pointer;
-        width: 100%;
-        border-radius: 8px;
+    background-color: #388e3c;
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    width: 100%;
+    border-radius: 8px;
     }
 
-        .modal button:hover {
-            background-color: #2c6e2d;
-        }
+    .modal button:hover {
+    background-color: #2c6e2d;
+    }
 
     .error-message {
-        color: red;
-        font-size: 14px;
-        margin-top: 10px;
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
     }
 </style>
 
@@ -207,10 +208,10 @@
 </div>
 
 
-<!-- Balance Section -->
+
 <div class="balance-section">
     <h4>Hello, User</h4>
-    <p>Balance: $@currentBalance</p> <!-- Displaying the current balance -->
+    <p>Balance:@currency@currentBalance</p> <!-- Displaying the current balance -->
     <p>Date: @DateTime.Now.ToString("MMMM dd, yyyy")</p>
 
     <button class="add-balance-btn" @onclick="OpenModal">Add Balance</button>
@@ -232,7 +233,7 @@
     <table>
         <thead>
             <tr>
-                <th>Due Date</th>
+                <th> Due Date</th>
                 <th>Description</th>
                 <th>Amount</th>
             </tr>
@@ -249,7 +250,7 @@
                     <tr class="@((upcomingDebts.IndexOf(debt) < 5 ? "highlight" : ""))">
                         <td>@debt.DueDate?.ToString("yyyy-MM-dd")</td>
                         <td>@debt.Label</td>
-                        <td>@debt.Amount</td>
+                        <td>@currency@debt.Amount</td>
                     </tr>
                 }
             }
@@ -278,11 +279,12 @@
     private int currentBalance;
     private string errorMessage = string.Empty; // Error message
     private List<DebtModel> upcomingDebts = new List<DebtModel>();
+    public string currency;
 
     protected override void OnInitialized()
     {
+        currency = UserService.getCurrency();
         currentBalance = UserService.GetUserBalance();
-
         upcomingDebts = debtService.GetAllDebts()
             .Where(d => d.DueDate.HasValue) // Ensure the DueDate is set
             .OrderBy(d => d.DueDate)  // Sort by DueDate for upcoming debts
@@ -329,6 +331,7 @@
             currentBalance += amountToAdd;
             CloseModal();
             errorMessage = string.Empty; // Clear the error message on success
+           
         }
         else
         {
