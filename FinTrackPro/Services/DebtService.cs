@@ -108,6 +108,21 @@ namespace FinTrackPro.Services
             }
             return clearedDebt;
         }
+
+        public int UnpiadDebt()
+        {
+            var debts = GetAllDebts();
+            int unpaid = 0;
+
+            foreach (var debt in debts)
+            {
+                if (debt.Status == "Pending")
+                {
+                    unpaid += debt.Amount;
+                }
+            }
+            return unpaid;
+        }
         public int GetHighestPendingDebt()
         {
             List<DebtModel> debts = GetAllDebts();
@@ -131,6 +146,7 @@ namespace FinTrackPro.Services
 
             return lowestPendingDebt?.Amount ?? 0; // Return the amount of the lowest pending debt, or 0 if none
         }
+       
 
         public int GetHighestPaidDebt()
         {
@@ -155,7 +171,6 @@ namespace FinTrackPro.Services
 
             return lowestPaidDebt?.Amount ?? 0; // Return the amount of the lowest paid debt, or 0 if none
         }
-
 
 
         private void SaveDebts(List<DebtModel> debts)

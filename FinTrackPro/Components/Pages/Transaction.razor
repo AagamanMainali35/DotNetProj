@@ -213,13 +213,16 @@
         private bool isViewTransactionPopupVisible = false;
         private int currentBalance;
         private string errorMessage = string.Empty;
-
+        private bool isPredefinedTagActive = false;
+        private bool isCustomTagActive = false;
+        private string customTag = string.Empty;
         // Filters
         private string labelFilter = string.Empty;
         private string payeeFilter = string.Empty;
         private DateTime? dateFilter;
         private string tagFilter = string.Empty;
         private string currency;
+        public string errormessage;
 
         // Sorting
         private bool isAscending = true; // To track sorting order
@@ -230,6 +233,29 @@
             currentBalance = UserService.GetUserBalance();
             transactions = TransactionService.GetAllTransactions();
             filteredTransactions = transactions ?? new List<TransactionModel>();
+        }
+        private void OnTagSelected(ChangeEventArgs e)
+        {
+            isPredefinedTagActive = !string.IsNullOrEmpty(e.Value?.ToString());
+            isCustomTagActive = false;
+
+            // If a predefined tag is selected, clear the custom tag input
+            if (isPredefinedTagActive)
+            {
+                customTag = string.Empty;
+            }
+        }
+
+        private void OnCustomTagEntered(ChangeEventArgs e)
+        {
+            isCustomTagActive = !string.IsNullOrEmpty(e.Value?.ToString());
+            isPredefinedTagActive = false;
+
+            // If a custom tag is entered, clear the predefined tag selection
+            if (isCustomTagActive)
+            {
+                newTransaction.Tag = string.Empty;
+            }
         }
 
         private void ApplyFilters()
@@ -282,11 +308,20 @@
                 UserService.UpdateUserBalance(currentBalance);
             }
             else if (newTransaction.type == "Debit")
-            {
-                currentBalance -= newTransaction.Amount;
-                UserService.UpdateUserBalance(currentBalance);
-            }
 
+            {
+                if (currentBalance >= newTransaction.Amount)
+                {
+                    currentBalance -= newTransaction.Amount;
+                    UserService.UpdateUserBalance(currentBalance);
+                   // Only add if balance is sufficient
+                }
+                else
+                {
+                    errorMessage = "Insufficient balance!";
+                    return; // Prevent further execution if the balance is insufficient
+                }
+            }
             TransactionService.AddTransaction(newTransaction);
             transactions = TransactionService.GetAllTransactions();
             ApplyFilters();
@@ -403,21 +438,30 @@
             <button class="add-transaction-btn" @onclick="ShowAddTransactionPopup">Add Transaction</button>
         </div>
     </div>
-
     <div class="modal" style="@(isAddTransactionPopupVisible ? "display: flex;" : "display: none;")">
         <div class="modal-content">
             <span class="close" @onclick="HideAddTransactionPopup">&times;</span>
             <h3>Add a New Transaction</h3>
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <p style="color:red">@errorMessage</p>
+            }
             <input type="text" @bind="newTransaction.Label" placeholder="Payment Name" />
             <input type="text" @bind="newTransaction.Payee" placeholder="Payable To" />
             <input type="date" @bind="newTransaction.Date" />
             <input type="number" @bind="newTransaction.Amount" placeholder="Amount Payable" />
-            <select @bind="newTransaction.Tag">
+
+            <!-- Predefined Tag Dropdown -->
+            <select @bind="newTransaction.Tag" @oninput="OnTagSelected" disabled="@isCustomTagActive">
                 <option value="">Select Tag</option>
                 <option value="Vehicle">Vehicle</option>
                 <option value="Person">Person</option>
                 <option value="Utility">Utility</option>
             </select>
+
+            <!-- Custom Tag Input -->
+            <input type="text" @bind="customTag" placeholder="Custom Tag" @oninput="OnCustomTagEntered" disabled="@isPredefinedTagActive" />
+
             <select @bind="newTransaction.type">
                 <option value="">Select Type</option>
                 <option value="Credit">Credit</option>
@@ -428,4 +472,5 @@
             <button class="add-transaction-btn" @onclick="AddTransaction">Add Transaction</button>
         </div>
     </div>
+
 </body>
